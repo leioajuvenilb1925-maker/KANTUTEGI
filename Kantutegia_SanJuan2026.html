@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="eu">
 <head>
 <meta charset="UTF-8">
@@ -25,14 +25,15 @@
   .card-title { font-size:0.95rem; font-weight:600; color:#1a2a1a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .card-sub { font-size:0.72rem; color:#888; margin-top:2px; }
   .card-actions { display:flex; gap:8px; align-items:center; flex-shrink:0; }
-  .btn-yt { background:#4a7a55; border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; }
+  .btn-yt { background:#4a7a55; border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; text-decoration:none; transition:background .2s; }
+  .btn-yt:hover { background:#3a6645; }
   .btn-yt svg { width:14px; height:14px; fill:#fff; }
 
   /* FULL PAGE OVERLAY */
-  .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#f2f0eb; z-index:1000; overflow-y:auto; }
-  .overlay.active { display:block; }
+  .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100vh; background:#f2f0eb; z-index:1000; overflow:hidden; flex-direction:column; }
+  .overlay.active { display:flex; }
 
-  .letrak-page { max-width:720px; margin:0 auto; padding:2rem 1.5rem 4rem; }
+  .letrak-page { max-width:900px; width:100%; margin:0 auto; padding:1.5rem 2rem; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
   .letrak-topbar { display:flex; align-items:center; gap:14px; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid #d0d4cc; flex-wrap:wrap; }
   .btn-back { background:#4a7a55; border:none; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.95rem; font-weight:700; display:flex; align-items:center; gap:8px; text-decoration:none; flex-shrink:0; }
@@ -43,16 +44,15 @@
   .btn-nav:hover { border-color:#4a7a55; }
   .btn-nav:disabled { opacity:0.3; cursor:default; }
 
-  .letrak-header { margin-bottom:1.5rem; }
+  .letrak-topbar { flex-shrink:0; }
+  .letrak-header { margin-bottom:1rem; flex-shrink:0; }
   .letrak-num { display:inline-block; background:#4a7a55; color:#fff; font-weight:700; font-size:0.9rem; padding:4px 12px; border-radius:6px; margin-bottom:10px; }
   .letrak-title { font-size:2rem; font-weight:700; color:#2c5a3d; line-height:1.2; margin-bottom:6px; }
   .letrak-egilea { font-size:0.9rem; color:#888; }
 
-  .letrak-btn-yt { display:inline-flex; align-items:center; gap:8px; background:#4a7a55; color:#fff; font-weight:700; font-size:0.85rem; padding:9px 20px; border-radius:8px; text-decoration:none; margin-bottom:2rem; }
-  .letrak-btn-yt:hover { background:#3a6645; }
-  .letrak-btn-yt svg { width:16px; height:16px; fill:#fff; }
+  .letrak-audio { width:100%; margin-bottom:1rem; flex-shrink:0; accent-color:#4a7a55; }
 
-  .letrak-body { font-size:1.1rem; line-height:2; color:#2a3a2a; white-space:pre-wrap; background:#ffffff; border-radius:12px; padding:2rem; border-left:4px solid #4a7a55; }
+  .letrak-body { font-size:1.1rem; line-height:2; color:#2a3a2a; white-space:pre-wrap; background:#ffffff; border-radius:12px; padding:1.5rem 2rem; border-left:4px solid #4a7a55; flex:1; overflow:hidden; column-gap:2.5rem; }
 
   /* VIDEO MODAL */
   .video-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; }
@@ -108,10 +108,7 @@
       <div class="letrak-title" id="lk-title"></div>
       <div class="letrak-egilea" id="lk-egilea"></div>
     </div>
-    <a class="letrak-btn-yt" id="lk-yt" href="#">
-      <svg viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
-      YouTube-n entzun
-    </a>
+    <audio class="letrak-audio" id="lk-audio" controls preload="none"></audio>
     <div class="letrak-body" id="lk-body"></div>
   </div>
 </div>
@@ -867,25 +864,108 @@ Ta amestuko dugu gauean, oraindik gelditzen zaiguna.
 Egunak hobeak baitira zurekin batera, zurekin batera.` }
 ];
 
-function getVideoId(song) {
-  if (!song.yt) return null;
-  const m = song.yt.match(/(?:youtu\.be\/|v=)([\w\-]+)/);
-  return m ? m[1] : null;
+const SUPABASE_URL    = 'https://etcdnlfjwmaverhxgozl.supabase.co';
+const SUPABASE_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0Y2RubGZqd21hdmVyaHhnb3psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwNDc0NzMsImV4cCI6MjA5NzYyMzQ3M30.vkf7KtYak_9RnTxc__W2EgcWSf7_0nKqXev10KtBNG4';
+const SUPABASE_BUCKET = 'kantutegi';
+const STORAGE_BASE    = `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_BUCKET}/`;
+
+const mp3Map = {};
+
+async function cargarMapaAudio() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/list/${SUPABASE_BUCKET}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}`, 'apikey': SUPABASE_KEY },
+      body: JSON.stringify({ prefix: '', limit: 200, offset: 0 })
+    });
+    const files = await res.json();
+    if (!Array.isArray(files)) return;
+    files.forEach(f => {
+      const m = f.name.match(/^(\d+)/);
+      if (m) mp3Map[parseInt(m[1], 10)] = f.name;
+    });
+  } catch (e) { console.warn('Audio map error:', e); }
 }
 
-function openVideo(song, e) {
+function mp3Path(song) {
+  const filename = mp3Map[song.n];
+  return filename ? STORAGE_BASE + encodeURIComponent(filename) : '';
+}
+
+let _activeCardAudio = null;
+
+function playCardAudio(song, btn, e) {
   e.preventDefault();
   e.stopPropagation();
-  if (!song.yt) return;
-  window.open(song.yt, '_blank', 'noopener,noreferrer');
+  const path = mp3Path(song);
+  if (_activeCardAudio && _activeCardAudio._btn !== btn) {
+    _activeCardAudio.pause();
+    _activeCardAudio._btn.innerHTML = playIcon();
+    _activeCardAudio = null;
+  }
+  if (!btn._audio) {
+    const a = new Audio(path);
+    a._btn = btn;
+    btn._audio = a;
+    a.addEventListener('ended', () => { btn.innerHTML = playIcon(); _activeCardAudio = null; });
+    a.addEventListener('pause', () => { if (!a.ended) btn.innerHTML = playIcon(); });
+    a.addEventListener('play', () => { btn.innerHTML = pauseIcon(); });
+  }
+  const audio = btn._audio;
+  if (audio.paused) { audio.play().catch(() => {}); _activeCardAudio = audio; }
+  else { audio.pause(); _activeCardAudio = null; }
 }
 
-function closeVideo() {
-  document.getElementById('video-modal').classList.remove('active');
-  document.getElementById('video-iframe').src = '';
+function playIcon() {
+  return '<svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="#fff"/></svg>';
+}
+function pauseIcon() {
+  return '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="4" height="18" fill="#fff"/><rect x="15" y="3" width="4" height="18" fill="#fff"/></svg>';
 }
 
 let currentIdx = 0;
+
+function adjustColumns() {
+  const b = document.getElementById('lk-body');
+  const page = document.querySelector('.letrak-page');
+
+  b.style.columns = '1';
+  b.style.fontSize = '1.1rem';
+  b.style.lineHeight = '2';
+
+  setTimeout(() => {
+    const pageH = page.clientHeight;
+    const pagePad = 48;
+    const fixed = ['letrak-topbar','letrak-header','letrak-btn-yt']
+      .reduce((sum, cls) => sum + (document.querySelector('.' + cls)?.offsetHeight || 0), 0);
+    const available = pageH - fixed - pagePad;
+
+    b.style.height = 'auto';
+    b.style.flex = 'none';
+    b.style.overflow = 'visible';
+    const naturalH = b.scrollHeight;
+    b.style.height = '';
+    b.style.flex = '1';
+    b.style.overflow = 'hidden';
+
+    if (naturalH > available) {
+      b.style.columns = '2';
+      setTimeout(() => {
+        b.style.height = 'auto';
+        b.style.flex = 'none';
+        b.style.overflow = 'visible';
+        const h2 = b.scrollHeight;
+        b.style.height = '';
+        b.style.flex = '1';
+        b.style.overflow = 'hidden';
+        if (h2 > available) {
+          b.style.fontSize = '0.92rem';
+          b.style.lineHeight = '1.75';
+        }
+      });
+    }
+  });
+}
 
 function openSong(idx) {
   currentIdx = idx;
@@ -894,19 +974,25 @@ function openSong(idx) {
   document.getElementById('lk-title').textContent = s.title;
   document.getElementById('lk-egilea').textContent = s.egilea;
   document.getElementById('lk-body').textContent = s.letrak;
-  document.getElementById('lk-yt').onclick = (e) => openVideo(s, e);
+  const lkAudio = document.getElementById('lk-audio');
+  lkAudio.pause();
+  lkAudio.src = mp3Path(s);
   document.getElementById('btn-prev').disabled = idx === 0;
   document.getElementById('btn-next').disabled = idx === songs.length - 1;
   const overlay = document.getElementById('overlay');
   overlay.classList.add('active');
-  overlay.scrollTop = 0;
+  adjustColumns();
 }
 
 function closeSong() {
   document.getElementById('overlay').classList.remove('active');
+  const a = document.getElementById('lk-audio');
+  a.pause();
+  a.src = '';
 }
 
 // Build grid
+cargarMapaAudio().finally(() => {
 const grid = document.getElementById('grid');
 songs.forEach((s, idx) => {
   const card = document.createElement('div');
@@ -919,25 +1005,24 @@ songs.forEach((s, idx) => {
         <div class="card-sub">${s.egilea}</div>
       </div>
       <div class="card-actions">
-        <a class="btn-yt" href="#" title="YouTube" onclick="openVideo(songs[${idx}], event)">
-          <svg viewBox="0 0 24 24"><path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/></svg>
-        </a>
+        <button class="btn-yt" title="Erreproduzitu" id="btn-play-${idx}">${playIcon()}</button>
       </div>
     </div>
   `;
   card.addEventListener('click', () => openSong(idx));
   grid.appendChild(card);
+  const playBtn = document.getElementById(`btn-play-${idx}`);
+  playBtn.addEventListener('click', (e) => playCardAudio(s, playBtn, e));
 });
+}); // fin cargarMapaAudio
 
 document.getElementById('btn-back').addEventListener('click', closeSong);
-document.getElementById('video-close').addEventListener('click', closeVideo);
-document.getElementById('video-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeVideo(); });
 document.getElementById('btn-prev').addEventListener('click', () => openSong(currentIdx - 1));
 document.getElementById('btn-next').addEventListener('click', () => openSong(currentIdx + 1));
 
 document.addEventListener('keydown', e => {
   if (!document.getElementById('overlay').classList.contains('active')) return;
-  if (e.key === 'Escape') { closeVideo(); closeSong(); }
+  if (e.key === 'Escape') { closeSong(); }
   if (e.key === 'ArrowRight' && currentIdx < songs.length - 1) openSong(currentIdx + 1);
   if (e.key === 'ArrowLeft' && currentIdx > 0) openSong(currentIdx - 1);
 });
