@@ -88,8 +88,8 @@
     .card-sub { font-size:0.76rem; line-height:1.25; }
     .btn-yt { width:46px; height:46px; }
     .btn-yt svg { width:18px; height:18px; }
-    .overlay { height:100dvh; overflow:auto; }
-    .letrak-page { height:100dvh; min-height:0; padding:1rem; overflow:hidden; }
+    .overlay { height:100dvh; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+    .letrak-page { height:auto; min-height:100dvh; padding:1rem; overflow:visible; }
     .letrak-topbar { gap:8px; margin-bottom:0.5rem; padding-bottom:0.55rem; }
     .btn-back { padding:10px 14px; font-size:0.9rem; }
     .letrak-nav { display:none; }
@@ -99,7 +99,7 @@
     .letrak-title { display:none; }
     .letrak-egilea { display:none; }
     .btn-video-link { width:100%; justify-content:center; padding:10px 14px; font-size:0.9rem; }
-    .letrak-body { padding:1rem 1rem 1.5rem; font-size:0.97rem; line-height:1.7; border-radius:10px; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+    .letrak-body { padding:1rem 1rem 1.5rem; font-size:0.97rem; line-height:1.7; border-radius:10px; flex:none; overflow:visible; touch-action:pan-y; }
     .video-wrap { width:min(94vw, 800px); }
     .video-close { top:-34px; font-size:1.5rem; }
     .letrak-topbar-logo { height:34px; }
