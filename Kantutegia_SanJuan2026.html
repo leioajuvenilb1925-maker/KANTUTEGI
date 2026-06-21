@@ -51,11 +51,12 @@
   .letrak-title { font-size:2rem; font-weight:700; color:#2c5a3d; line-height:1.2; margin-bottom:6px; }
   .letrak-egilea { font-size:0.9rem; color:#888; }
 
-  .letrak-audio { display:none; }
-  .audio-status { display:none; }
+  .letrak-audio { display:block; width:100%; margin-bottom:0.75rem; flex-shrink:0; }
+  .audio-status { font-size:0.85rem; color:#888; margin-bottom:0.5rem; flex-shrink:0; }
   .yt-link-row { margin-bottom:1rem; flex-shrink:0; }
-  .btn-video-link { display:inline-flex; align-items:center; gap:8px; background:#4a7a55; color:#fff; border:none; border-radius:8px; padding:10px 16px; font-size:0.95rem; font-weight:700; text-decoration:none; cursor:pointer; }
-  .btn-video-link:hover { background:#3a6645; }
+  .btn-video-link { display:inline-flex; align-items:center; gap:8px; background:#c00; color:#fff; border:none; border-radius:8px; padding:9px 16px; font-size:0.9rem; font-weight:700; cursor:pointer; }
+  .btn-video-link:hover { background:#a00; }
+  .btn-video-link svg { width:16px; height:16px; fill:#fff; }
 
   .letrak-body { font-size:1.1rem; line-height:2; color:#2a3a2a; white-space:pre-wrap; background:#ffffff; border-radius:12px; padding:1.5rem 2rem; border-left:4px solid #4a7a55; flex:1; overflow:hidden; column-gap:2.5rem; }
 
@@ -152,7 +153,10 @@
     <audio class="letrak-audio" id="lk-audio" controls preload="none"></audio>
     <div class="audio-status" id="lk-audio-status"></div>
     <div class="yt-link-row">
-      <a id="lk-video-link" class="btn-video-link" href="#" target="_blank" rel="noopener noreferrer">Ikusi YouTuben</a>
+      <button id="lk-video-btn" class="btn-video-link">
+        <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.8 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg>
+        Ikusi YouTuben
+      </button>
     </div>
     <div class="letrak-body" id="lk-body"></div>
   </div>
@@ -1022,32 +1026,9 @@ function closeVideo() {
 let _activeCardAudio = null;
 
 async function playCardAudio(song, btn, e) {
-  openVideo(song, e);
-  return;
-  const path = await resolveAudioPath(song);
-  if (!path) {
-    btn.innerHTML = playIcon();
-    setAudioStatus('Ez da audio-fitxategia aurkitu kanta honentzat.');
-    return;
-  }
-  setAudioStatus('');
-  if (_activeCardAudio && _activeCardAudio._btn !== btn) {
-    _activeCardAudio.pause();
-    _activeCardAudio._btn.innerHTML = playIcon();
-    _activeCardAudio = null;
-  }
-  if (!btn._audio || btn._audio.src !== path) {
-    if (btn._audio) btn._audio.pause();
-    const a = new Audio(path);
-    a._btn = btn;
-    btn._audio = a;
-    a.addEventListener('ended', () => { btn.innerHTML = playIcon(); _activeCardAudio = null; });
-    a.addEventListener('pause', () => { if (!a.ended) btn.innerHTML = playIcon(); });
-    a.addEventListener('play', () => { btn.innerHTML = pauseIcon(); });
-  }
-  const audio = btn._audio;
-  if (audio.paused) { audio.play().catch(() => {}); _activeCardAudio = audio; }
-  else { audio.pause(); _activeCardAudio = null; }
+  if (e) { e.preventDefault(); e.stopPropagation(); }
+  const idx = songs.findIndex(s => s.n === song.n);
+  openSong(idx);
 }
 
 function playIcon() {
@@ -1113,12 +1094,22 @@ async function openSong(idx) {
   document.getElementById('lk-title').textContent = s.title;
   document.getElementById('lk-egilea').textContent = s.egilea;
   document.getElementById('lk-body').textContent = s.letrak;
-  document.getElementById('lk-video-link').href = s.yt || '#';
   const lkAudio = document.getElementById('lk-audio');
   lkAudio.pause();
   lkAudio.removeAttribute('src');
   lkAudio.load();
   setAudioStatus('');
+  resolveAudioPath(s).then(path => {
+    if (path) { lkAudio.src = path; lkAudio.load(); }
+    else setAudioStatus('Audio ez dago erabilgarri.');
+  });
+  const videoBtn = document.getElementById('lk-video-btn');
+  if (s.yt) {
+    videoBtn.style.display = 'inline-flex';
+    videoBtn.onclick = (e) => openVideo(s, e);
+  } else {
+    videoBtn.style.display = 'none';
+  }
   document.getElementById('btn-prev').disabled = idx === 0;
   document.getElementById('btn-next').disabled = idx === songs.length - 1;
   const overlay = document.getElementById('overlay');
