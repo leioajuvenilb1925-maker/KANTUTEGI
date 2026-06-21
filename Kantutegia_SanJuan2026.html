@@ -35,6 +35,7 @@
 
   .letrak-page { max-width:900px; width:100%; margin:0 auto; padding:1.5rem 2rem; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
 
+  .letrak-sticky { flex-shrink:0; background:#f2f0eb; }
   .letrak-topbar { display:flex; align-items:center; gap:14px; margin-bottom:2rem; padding-bottom:1rem; border-bottom:1px solid #d0d4cc; flex-wrap:wrap; }
   .btn-back { background:#4a7a55; border:none; color:#fff; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:0.95rem; font-weight:700; display:flex; align-items:center; gap:8px; text-decoration:none; flex-shrink:0; }
   .btn-back:hover { background:#3a6645; }
@@ -88,8 +89,9 @@
     .card-sub { font-size:0.76rem; line-height:1.25; }
     .btn-yt { width:46px; height:46px; }
     .btn-yt svg { width:18px; height:18px; }
-    .overlay { height:100dvh; overflow:hidden; }
-    .letrak-page { height:100dvh; min-height:0; padding:1rem; overflow:hidden; }
+    .overlay { height:100dvh; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+    .letrak-page { height:auto; min-height:100dvh; padding:1rem; overflow:visible; }
+    .letrak-sticky { position:sticky; top:0; z-index:5; padding-bottom:0.4rem; }
     .letrak-topbar { gap:8px; margin-bottom:0.5rem; padding-bottom:0.55rem; }
     .btn-back { padding:10px 14px; font-size:0.9rem; }
     .letrak-nav { display:none; }
@@ -99,7 +101,7 @@
     .letrak-title { display:none; }
     .letrak-egilea { display:none; }
     .btn-video-link { width:100%; justify-content:center; padding:10px 14px; font-size:0.9rem; }
-    .letrak-body { padding:1rem 1rem 1.5rem; font-size:0.97rem; line-height:1.7; border-radius:10px; flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; touch-action:pan-y; overscroll-behavior:contain; }
+    .letrak-body { padding:1rem 1rem 1.5rem; font-size:0.97rem; line-height:1.7; border-radius:10px; flex:none; overflow:visible; touch-action:pan-y; }
     .video-wrap { width:min(94vw, 800px); }
     .video-close { top:-34px; font-size:1.5rem; }
     .letrak-topbar-logo { height:34px; }
